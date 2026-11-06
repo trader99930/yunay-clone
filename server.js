@@ -57,8 +57,19 @@ app.post("/api/scan-url", async (req, res) => {
   if (!url) {
     return res.status(400).json({ error: "URL required hai." });
   }
+
+  let parsed;
   try {
-    const raw = await scanWebsite(url);
+    parsed = new URL(url);
+  } catch (e) {
+    return res.status(400).json({ error: "Invalid URL. http:// ya https:// ke saath poora URL do." });
+  }
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    return res.status(400).json({ error: "Sirf http:// aur https:// URLs supported hain." });
+  }
+
+  try {
+    const raw = await scanWebsite(parsed.href);
     res.json({ success: true, report: analyzeWebStructure(raw) });
   } catch (e) {
     res.status(500).json({ error: e.message });

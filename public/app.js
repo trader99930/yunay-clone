@@ -143,8 +143,17 @@
   function renderWebReport(report) {
     $("#web-title").textContent = report.title || "Untitled";
     const link = $("#web-url");
-    link.textContent = report.targetUrl || "";
-    link.href = report.targetUrl || "#";
+    const displayUrl = report.finalUrl || report.targetUrl || "";
+    link.textContent = displayUrl;
+    link.href = displayUrl || "#";
+
+    const warnBox = $("#web-warning");
+    if (report.warnings && report.warnings.length) {
+      warnBox.textContent = report.warnings.join("\n");
+      warnBox.classList.remove("hidden");
+    } else {
+      warnBox.classList.add("hidden");
+    }
 
     renderChips($("#web-stack"), report.detectedTechStack);
 

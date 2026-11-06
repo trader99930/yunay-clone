@@ -17,12 +17,16 @@ function analyzeWebStructure(scanData) {
 
   return {
     targetUrl: scanData.url,
+    finalUrl: scanData.finalUrl,
     title: scanData.title,
+    statusCode: scanData.statusCode,
+    warnings: scanData.warnings || [],
     detectedTechStack: detectedStack,
     stats: scanData.stats,
     assets: scanData.assets,
     apiEndpoints: scanData.apiCalls,
     screenshot: scanData.screenshot,
+    navigations: scanData.navigations || [],
     htmlPreview: scanData.htmlSnippet
   };
 }
