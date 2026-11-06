@@ -63,7 +63,12 @@ function analyzeApkStructure(apkData) {
   const detectedStack = [];
   const libs = apkData.stats.nativeLibs.join(' ').toLowerCase();
   const assets = apkData.stats.assetsList.join(' ').toLowerCase();
+  const webApk = apkData.manifest.webApk;
 
+  // Chrome "Add to Home screen" wala PWA shortcut (org.chromium.webapk.*)
+  if (webApk && webApk.isWebApk) {
+    detectedStack.push('WebAPK (Chrome PWA)');
+  }
   if (libs.includes('libflutter.so') || assets.includes('flutter_assets')) {
     detectedStack.push('Flutter');
   }
@@ -97,6 +102,7 @@ function analyzeApkStructure(apkData) {
       nativeLibsCount: apkData.stats.nativeLibs.length,
       assetsCount: apkData.stats.assetsList.length
     },
+    webApp: apkData.manifest.webApk,
     extractedWebPreview: apkData.extractedWebPreview
   };
 }

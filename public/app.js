@@ -11,6 +11,7 @@
   };
 
   let lastReport = null;
+  let lastWebAppUrl = null;
 
   /* Fetch response ko safely JSON parse karta hai. Agar server HTML bheje
      (jaise Express ka error page) to readable error deta hai, obscure
@@ -30,13 +31,17 @@
   }
 
   /* ---------- tabs ---------- */
-  document.querySelectorAll(".tab").forEach((tab) => {
-    tab.addEventListener("click", () => {
-      document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
-      document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
-      tab.classList.add("active");
-      $("#tab-" + tab.dataset.tab).classList.add("active");
+  function activateTab(name) {
+    document.querySelectorAll(".tab").forEach((t) => {
+      t.classList.toggle("active", t.dataset.tab === name);
     });
+    document.querySelectorAll(".panel").forEach((p) => {
+      p.classList.toggle("active", p.id === "tab-" + name);
+    });
+  }
+
+  document.querySelectorAll(".tab").forEach((tab) => {
+    tab.addEventListener("click", () => activateTab(tab.dataset.tab));
   });
 
   /* ---------- helpers ---------- */
@@ -306,6 +311,22 @@
 
     renderList($("#apk-perms"), report.permissions || [], assetItem);
 
+    // WebAPK / PWA shortcut: original website URL dikhao
+    const webApp = report.webApp;
+    const webAppBox = $("#apk-webapp");
+    lastWebAppUrl = (webApp && (webApp.startUrl || webApp.scope)) || null;
+    if (webApp && webApp.isWebApk) {
+      renderStats($("#apk-webapp-info"), [
+        ["Start URL", webApp.startUrl],
+        ["Scope", webApp.scope],
+        ["Manifest URL", webApp.webManifestUrl],
+        ["Display mode", webApp.displayMode]
+      ]);
+      webAppBox.classList.remove("hidden");
+    } else {
+      webAppBox.classList.add("hidden");
+    }
+
     const web = report.extractedWebPreview || {};
     const preview = Object.entries(web)
       .map(([name, content]) => "=== " + name + " ===\n" + content)
@@ -313,6 +334,14 @@
     $("#apk-web").textContent = preview || "No web assets found";
     $("#apk-raw").textContent = JSON.stringify(report, null, 2);
   }
+
+  /* ---------- WebAPK -> website scan ---------- */
+  $("#apk-scan-web").addEventListener("click", () => {
+    if (!lastWebAppUrl) return;
+    activateTab("web");
+    $("#url").value = lastWebAppUrl;
+    $("#scan-form").requestSubmit();
+  });
 
   /* ---------- boot ---------- */
   loadStatus();
