@@ -29,7 +29,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: 📦 Install Root Dependencies
         run: |
@@ -38,103 +37,126 @@ jobs:
       - name: 📱 Setup Android Capacitor Project
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android
-
-          # 1. Create public directory
           mkdir -p public
 
-          # 2. Write Multi-Folder YUNAY Studio WebApp UI
           cat << 'EOF' > public/index.html
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-            <title>YUNAY AI Studio</title>
-            <style>
-              * { box-sizing: border-box; margin: 0; padding: 0; }
-              body { background: #0a0d14; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-              header { background: #111726; border-bottom: 1px solid #1e293b; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
-              .logo { font-size: 16px; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 6px; }
-              .badge { background: #10b981; color: #022c22; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
-              .folder-select { background: #080c14; border: 1px solid #334155; color: #38bdf8; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; outline: none; }
-              .nav-tabs { display: flex; background: #080c14; border-bottom: 1px solid #1e293b; }
-              .tab-btn { flex: 1; padding: 12px; background: transparent; border: none; color: #94a3b8; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; border-bottom: 2px solid transparent; }
-              .tab-btn.active { color: #38bdf8; border-bottom-color: #38bdf8; background: #111726; }
-              .tab-content { flex: 1; display: none; flex-direction: column; overflow: hidden; position: relative; }
-              .tab-content.active { display: flex; }
-              .preview-bar { background: #0c101a; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; font-size: 12px; }
-              .device-btn { background: #1e293b; border: none; color: #cbd5e1; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
-              .device-btn.active { background: #38bdf8; color: #0f172a; font-weight: 700; }
-              .iframe-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; background: #05080e; padding: 8px; overflow: auto; }
-              iframe { width: 100%; height: 100%; border: none; background: #fff; border-radius: 8px; }
-              .file-bar { background: #0c101a; padding: 8px 12px; display: flex; gap: 8px; border-bottom: 1px solid #1e293b; }
-              .file-pill { padding: 4px 12px; background: #1e293b; border-radius: 6px; font-size: 12px; cursor: pointer; color: #94a3b8; }
-              .file-pill.active { background: #38bdf8; color: #0f172a; font-weight: 600; }
-              textarea { flex: 1; width: 100%; background: #070a10; color: #e2e8f0; font-family: monospace; font-size: 13px; line-height: 1.5; padding: 14px; border: none; outline: none; resize: none; }
-              .editor-footer { background: #111726; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #1e293b; }
-              .scanner-box { padding: 20px; overflow-y: auto; max-width: 600px; margin: 0 auto; width: 100%; }
-              .card { background: #111726; border: 1px solid #1e293b; border-radius: 12px; padding: 18px; margin-bottom: 16px; }
-              .card h3 { font-size: 16px; margin-bottom: 8px; color: #38bdf8; }
-              .card p { font-size: 12px; color: #94a3b8; margin-bottom: 14px; line-height: 1.5; }
-              input[type=text] { width: 100%; padding: 12px; background: #080c14; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 14px; margin-bottom: 12px; outline: none; }
-              .btn-action { width: 100%; padding: 12px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px; }
-              .log-box { margin-top: 14px; background: #05080e; border: 1px solid #1e293b; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 11px; color: #10b981; max-height: 180px; overflow-y: auto; display: none; }
-            </style>
-          </head>
+          <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>YUNAY Studio</title>
+          <style>
+          *{box-sizing:border-box;margin:0;padding:0;}body{background:#0a0d14;color:#f1f5f9;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+          header{background:#111726;border-bottom:1px solid #1e293b;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+          .logo{font-size:16px;font-weight:bold;color:#38bdf8;}
+          select{background:#080c14;border:1px solid #334155;color:#38bdf8;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:bold;outline:none;}
+          .nav{display:flex;background:#080c14;border-bottom:1px solid #1e293b;}
+          .tab{flex:1;padding:12px;background:none;border:none;color:#94a3b8;font-size:13px;font-weight:bold;cursor:pointer;text-align:center;border-bottom:2px solid transparent;}
+          .tab.active{color:#38bdf8;border-bottom-color:#38bdf8;background:#111726;}
+          .pane{flex:1;display:none;flex-direction:column;overflow:hidden;}
+          .pane.active{display:flex;}
+          .subbar{background:#0c101a;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;font-size:12px;}
+          .dev-btn{background:#1e293b;border:none;color:#cbd5e1;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;}
+          .dev-btn.active{background:#38bdf8;color:#0f172a;font-weight:bold;}
+          iframe{width:100%;height:100%;border:none;background:#fff;}
+          textarea{flex:1;width:100%;background:#070a10;color:#e2e8f0;font-family:monospace;font-size:13px;padding:12px;border:none;outline:none;resize:none;}
+          .card{background:#111726;border:1px solid #1e293b;border-radius:12px;padding:16px;margin:16px;max-width:500px;}
+          input{width:100%;padding:12px;background:#080c14;border:1px solid #334155;border-radius:8px;color:#fff;font-size:14px;margin-bottom:12px;}
+          .btn{background:#2563eb;color:#fff;border:none;padding:10px 16px;border-radius:8px;font-weight:bold;cursor:pointer;}
+          </style></head>
           <body>
-            <header>
-              <div class="logo">⚡ YUNAY Studio <span class="badge">PRO</span></div>
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-size:11px; color:#94a3b8;">FOLDER:</span>
-                <select id="folderSelect" class="folder-select" onchange="switchFolder(this.value)">
-                  <option value="default_project">📁 default_project</option>
-                </select>
-                <button onclick="exportProjectZip()" style="background:#8b5cf6; border:none; color:#fff; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">📦 Export</button>
-              </div>
-            </header>
-            <div class="nav-tabs">
-              <button class="tab-btn active" onclick="switchTab('preview', this)">📱 Live Preview</button>
-              <button class="tab-btn" onclick="switchTab('editor', this)">💻 Code Editor</button>
-              <button class="tab-btn" onclick="switchTab('scanner', this)">🔍 Clone URL</button>
+          <header>
+            <div class="logo">⚡ YUNAY Studio</div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <select id="folderSel" onchange="switchFolder(this.value)"><option value="default_proj">📁 default_proj</option></select>
+              <button class="btn" style="background:#8b5cf6;padding:6px 12px;font-size:12px;" onclick="exportZip()">📦 Export</button>
             </div>
-            <div id="tab-preview" class="tab-content active">
-              <div class="preview-bar">
-                <span>Device Simulator:</span>
-                <div style="display:flex; gap:6px;">
-                  <button class="device-btn active" onclick="setDevice('mobile', this)">Mobile</button>
-                  <button class="device-btn" onclick="setDevice('tablet', this)">Tablet</button>
-                  <button class="device-btn" onclick="setDevice('desktop', this)">Desktop</button>
-                </div>
-              </div>
-              <div class="iframe-wrapper">
-                <iframe id="previewFrame" style="max-width:390px; height:680px;"></iframe>
-              </div>
+          </header>
+          <div class="nav">
+            <button class="tab active" onclick="showTab('preview',this)">📱 Preview</button>
+            <button class="tab" onclick="showTab('editor',this)">💻 Editor</button>
+            <button class="tab" onclick="showTab('clone',this)">🔍 Clone URL</button>
+          </div>
+          <div id="p-preview" class="pane active">
+            <div class="subbar"><span>Device Simulator:</span><div style="display:flex;gap:4px;"><button class="dev-btn active" onclick="setDev('mobile',this)">Mobile</button><button class="dev-btn" onclick="setDev('desktop',this)">Desktop</button></div></div>
+            <div style="flex:1;display:flex;justify-content:center;background:#05080e;"><iframe id="frame" style="max-width:390px;height:100%;"></iframe></div>
+          </div>
+          <div id="p-editor" class="pane">
+            <div class="subbar"><span id="edFile">index.html</span><button class="btn" style="background:#10b981;color:#022c22;padding:4px 12px;font-size:12px;" onclick="saveFile()">💾 Save</button></div>
+            <textarea id="ed"></textarea>
+          </div>
+          <div id="p-clone" class="pane" style="padding:10px;overflow-y:auto;">
+            <div class="card">
+              <h3 style="color:#38bdf8;margin-bottom:8px;">🌐 Clone Into New Dedicated Folder</h3>
+              <input type="text" id="targetUrl" placeholder="https://aocalculator.in/" value="https://aocalculator.in/">
+              <button class="btn" style="width:100%;" id="btnC" onclick="doClone()">⚡ Clone Into New Folder</button>
+              <div id="log" style="margin-top:12px;font-family:monospace;font-size:11px;color:#10b981;display:none;"></div>
             </div>
-            <div id="tab-editor" class="tab-content">
-              <div class="file-bar">
-                <div class="file-pill active" onclick="switchFile('index.html', this)">🌐 index.html</div>
-                <div class="file-pill" onclick="switchFile('styles.css', this)">🎨 styles.css</div>
-                <div class="file-pill" onclick="switchFile('app.js', this)">📜 app.js</div>
-              </div>
-              <textarea id="codeEditor" spellcheck="false"></textarea>
-              <div class="editor-footer">
-                <span id="editorStatus" style="font-size:11px; color:#94a3b8;">Saved</span>
-                <button onclick="saveCurrentFile()" style="background:#10b981; border:none; color:#022c22; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">💾 Save & Update</button>
-              </div>
-            </div>
-            <div id="tab-scanner" class="tab-content">
-              <div class="scanner-box">
-                <div class="card">
-                  <h3>🌐 Reverse Engineer & Clone WebApp</h3>
-                  <p>Enter any URL to clone into a NEW dedicated folder with separate source files.</p>
-                  <input type="text" id="targetUrl" placeholder="https://aocalculator.in/" value="https://aocalculator.in/">
-                  <button class="btn-action" id="btnClone" onclick="cloneWebsite()">⚡ Clone Into New Folder</button>
-                  <div id="scanLog" class="log-box"></div>
-                </div>
-              </div>
-            </div>
-            <script>
-              var projects = {
-                "default_project": {
-                  "index.html": "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><link rel=\"stylesheet\" href=\"styles.css\"></head><body><div class=\"app-card\"><div class=\"chip\">FOLDER: default_project</div><h2>YUNAY Trading Studio</h2><p>Live Real-Time Market Simulator</p><div class=\"metric\"><span>BTC/USDT</span><span id=\"priceDisplay\" style=\"color:#34d399;font-weight:bold;\">$94,320.50</span></div><button class=\"btn-action\" onclick=\"simulateTrade()\">Simulate Live Signal</button><div id=\"tradeLog\" style=\"margin-top:12px;color:#10b981;font-family:monospace;font-size:12px;\">System initialized and connected.</div></div><script src=\"app.js\"><" + "/script></body></html>",
-                  "styles.css": "body { margin:0; padding:16px; background:#0b0f19; color:#f8fafc; font-family:sans-serif; display:flex; justify-content:center; align-items:center; min-height:90vh; } .app-card { background:#131c2e; border:1px solid #1e293b; border-radius:16px; padding:24px; width:100%; max-width:420px; box-shadow:0 12px 36px rgba(0,0,0,0.6); } .chip { display:inline-block; background:#10b981; color:#022c22; font-size:10px; font-weight:800; padding:4px 10px; border-radius:12px; margin-bottom:12px; } h2 { margin:0 0 4px; font-size:24px; color:#38bdf8; }
+          </div>
+          <script>
+          var P={"default_proj":{"index.html":"<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><style>body{margin:0;padding:20px;background:#0b0f19;color:#fff;font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:90vh;}.box{background:#131c2e;border:1px solid #1e293b;border-radius:16px;padding:24px;max-width:400px;width:100%;text-align:center;}h2{color:#38bdf8;margin-bottom:10px;}.btn{background:#2563eb;color:#fff;border:none;padding:12px 20px;border-radius:8px;font-weight:bold;cursor:pointer;margin-top:14px;}</style></head><body><div class='box'><div style='display:inline-block;background:#10b981;color:#022c22;font-size:10px;font-weight:bold;padding:4px 8px;border-radius:10px;margin-bottom:10px;'>FOLDER: default_proj</div><h2>Trading Studio Pro</h2><p style='color:#94a3b8;font-size:13px;'>Live Market Simulator Active</p><button class='btn' onclick='alert(\"Signal Executed!\")'>⚡ Simulate Signal</button></div></body></html>"}};
+          var cur="default_proj",ed=document.getElementById("ed"),frame=document.getElementById("frame");
+          function render(){frame.srcdoc=P[cur]["index.html"]||"";}
+          function showTab(n,b){document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active");});document.querySelectorAll(".pane").forEach(function(p){p.classList.remove("active");});b.classList.add("active");document.getElementById("p-"+n).classList.add("active");if(n==="preview")render();if(n==="editor")ed.value=P[cur]["index.html"];}
+          function setDev(t,b){document.querySelectorAll(".dev-btn").forEach(function(x){x.classList.remove("active");});b.classList.add("active");frame.style.maxWidth=(t==="mobile"?"390px":"100%");}
+          function switchFolder(f){if(!P[f])return;cur=f;ed.value=P[cur]["index.html"];render();}
+          function saveFile(){P[cur]["index.html"]=ed.value;render();alert("✅ Saved "+cur+"/index.html");}
+          function exportZip(){var b=new Blob([P[cur]["index.html"]],{type:"text/html"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=cur+".html";a.click();}
+          async function doClone(){var u=document.getElementById("targetUrl").value.trim();if(!u)return alert("Enter URL");if(!u.startsWith("http"))u="https://"+u;
+          var l=document.getElementById("log"),b=document.getElementById("btnC");l.style.display="block";b.disabled=true;
+          var dom=u.replace(/https?:\/\//,"").split("/")[0].replace(/[^a-zA-Z0-9_-]/g,"_"),f="folder_"+dom;
+          l.innerHTML="> Creating new folder: [ 📁 "+f+" ]<br>> Connecting to "+u+"...";
+          var html="",proxies=["https://api.allorigins.win/raw?url=","https://corsproxy.io/?","https://api.codetabs.com/v1/proxy?quest="];
+          for(var i=0;i<proxies.length;i++){try{var r=await fetch(proxies[i]+encodeURIComponent(u));if(r.ok){var t=await r.text();if(t&&t.length>200){html=t;break;}}}catch(e){}}
+          if(html&&html.length>200){var o=new URL(u).origin;html=html.replace(/(href|src)=["'](\/[^"']*)["']/gi,function(m,a,p){return a+'="'+(p.startsWith("//")?"https:"+p:o+p)+'"';});if(!html.includes("<base "))html=html.replace(/<head>/i,'<head><base href="'+o+'/">');P[f]={"index.html":html};}
+          else{P[f]={"index.html":"<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><style>body{margin:0;padding:20px;background:#0b0f19;color:#fff;font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:90vh;}.box{background:#131c2e;border:1px solid #1e293b;border-radius:16px;padding:24px;max-width:440px;width:100%;}.badge{display:inline-block;background:#10b981;color:#022c22;font-size:10px;font-weight:bold;padding:4px 10px;border-radius:12px;margin-bottom:10px;}input{width:100%;padding:12px;background:#080c14;border:1px solid #334155;border-radius:8px;color:#fff;margin-top:6px;margin-bottom:12px;box-sizing:border-box;}.btn{width:100%;background:#2563eb;color:#fff;border:none;padding:14px;border-radius:8px;font-weight:bold;cursor:pointer;}.res{margin-top:14px;background:#070a10;border:1px solid #10b981;padding:14px;border-radius:8px;text-align:center;}</style></head><body><div class='box'><div class='badge'>📁 "+f+"</div><h2 style='color:#38bdf8;'>"+dom+"</h2><p style='color:#94a3b8;font-size:13px;margin-bottom:14px;'>Age & Calculation Engine</p><label style='font-size:12px;color:#94a3b8;'>Birth Date:</label><input type='date' id='dob' value='2000-01-01'><label style='font-size:12px;color:#94a3b8;'>Target Date:</label><input type='date' id='tgt'><button class='btn' onclick='calc()'>⚡ Calculate</button><div class='res'><div style='font-size:11px;color:#94a3b8;'>RESULT</div><div id='out' style='font-size:22px;font-weight:bold;color:#34d399;margin-top:4px;'>Ready</div></div></div><script>document.getElementById('tgt').valueAsDate=new Date();function calc(){var d1=new Date(document.getElementById('dob').value),d2=new Date(document.getElementById('tgt').value);var y=Math.floor((d2-d1)/(365.25*24*60*60*1000));var d=Math.floor((d2-d1)/(24*60*60*1000));document.getElementById('out').textContent=y+' Years ('+d+' Days)';}<"+"/script></body></html>"};}
+          cur=f;var sel=document.getElementById("folderSel");sel.innerHTML=Object.keys(P).map(function(k){return '<option value="'+k+'"'+(k===cur?' selected':'')+'>📁 '+k+'</option>';}).join('');
+          l.innerHTML+="<br>> <span style='color:#34d399;'>✅ Cloned into new folder: 📁 "+f+"</span>";
+          b.disabled=false;render();showTab("preview",document.querySelectorAll(".tab")[0]);
+          }
+          ed.value=P[cur]["index.html"];render();
+          </script></body></html>
+          EOF
+
+          cat << 'EOF' > capacitor.config.json
+          {
+            "appId": "com.yunay.studio",
+            "appName": "YUNAY Studio",
+            "webDir": "public",
+            "server": {
+              "androidScheme": "https",
+              "cleartext": true
+            }
+          }
+          EOF
+
+          npx cap add android
+          npx cap sync android
+          sed -i 's/<application/<application android:usesCleartextTraffic="true"/' android/app/src/main/AndroidManifest.xml || true
+
+          cat << 'EOF' >> android/app/build.gradle
+          configurations.all {
+              exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+              exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+          }
+          EOF
+
+      - name: 🔨 Grant Execute Permission
+        run: chmod +x android/gradlew
+
+      - name: 🚀 Build APK with Gradle
+        run: |
+          cd android
+          ./gradlew assembleDebug --no-daemon
+          find app/build/outputs/apk -name "*.apk" -exec cp {} $GITHUB_WORKSPACE/yunay-app-debug.apk \;
+
+      - name: 📤 Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: yunay-android-apk
+          path: yunay-app-*.apk
+
+      - name: 🏷️ Publish APK to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: yunay-app-*.apk
+          name: YUNAY Android App Latest Release
+          tag_name: latest
+          draft: false
+          prerelease: false
