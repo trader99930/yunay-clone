@@ -12,6 +12,23 @@
 
   let lastReport = null;
 
+  /* Fetch response ko safely JSON parse karta hai. Agar server HTML bheje
+     (jaise Express ka error page) to readable error deta hai, obscure
+     "Unexpected token '<'" nahi. */
+  async function readJson(res) {
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      const type = res.headers.get("content-type") || "unknown content-type";
+      const body = text.trim();
+      const hint = body.startsWith("<")
+        ? "Server ne JSON ki jagah HTML bheja (" + res.status + ", " + type + "). API route ya server logs check karo."
+        : (body.slice(0, 200) || "Empty response");
+      throw new Error(hint);
+    }
+  }
+
   /* ---------- tabs ---------- */
   document.querySelectorAll(".tab").forEach((tab) => {
     tab.addEventListener("click", () => {
@@ -75,7 +92,7 @@
     try {
       const res = await fetch("/api/status");
       if (!res.ok) throw new Error("status " + res.status);
-      const data = await res.json();
+      const data = await readJson(res);
       const box = $("#status");
       box.classList.remove("bad");
       box.classList.add("ok");
@@ -107,7 +124,7 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url })
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (!res.ok) throw new Error(data.error || "Scan failed");
       lastReport = data.report;
       renderWebReport(data.report);
@@ -180,7 +197,7 @@
           projectName: $("#project-name").value.trim() || "yunay-reconstructed-app"
         })
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (!res.ok) throw new Error(data.error || "Reconstruction failed");
 
       const build = data.build;
@@ -215,7 +232,7 @@
 
     fetch("/api/analyze-zip", { method: "POST", body })
       .then(async (res) => {
-        const data = await res.json();
+        const data = await readJson(res);
         if (!res.ok) throw new Error(data.error || "Analysis failed");
         renderZipReport(data.report);
         $("#zip-result").classList.remove("hidden");
@@ -262,7 +279,7 @@
 
     fetch("/api/analyze-apk", { method: "POST", body })
       .then(async (res) => {
-        const data = await res.json();
+        const data = await readJson(res);
         if (!res.ok) throw new Error(data.error || "Analysis failed");
         renderApkReport(data.report);
         $("#apk-result").classList.remove("hidden");
