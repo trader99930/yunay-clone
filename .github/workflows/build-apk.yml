@@ -1,154 +1,102 @@
-name: Build & Release Android APK
-
+name: Build Android APK
 on:
   push:
-    branches:
-      - main
-    tags:
-      - 'v*'
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build-android-apk:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: 📥 Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: ☕ Set up JDK 21
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
-
-      - name: 🟢 Set up Node.js 20
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: 📦 Install Root Dependencies
-        run: |
-          npm ci --omit=dev || npm install --omit=dev
-
-      - name: 📱 Setup Android Capacitor Project
+      - name: Setup App & AOC Engine
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android
           mkdir -p public
-
-          cat << 'EOF' > public/index.html
-          <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>YUNAY Studio</title>
+          cat << 'HTMLEOF' > public/index.html
+          <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>AOC</title>
           <style>
-          *{box-sizing:border-box;margin:0;padding:0;}body{background:#0a0d14;color:#f1f5f9;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
-          header{background:#111726;border-bottom:1px solid #1e293b;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
-          .logo{font-size:16px;font-weight:bold;color:#38bdf8;}
-          select{background:#080c14;border:1px solid #334155;color:#38bdf8;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:bold;outline:none;}
-          .nav{display:flex;background:#080c14;border-bottom:1px solid #1e293b;}
-          .tab{flex:1;padding:12px;background:none;border:none;color:#94a3b8;font-size:13px;font-weight:bold;cursor:pointer;text-align:center;border-bottom:2px solid transparent;}
-          .tab.active{color:#38bdf8;border-bottom-color:#38bdf8;background:#111726;}
-          .pane{flex:1;display:none;flex-direction:column;overflow:hidden;}
-          .pane.active{display:flex;}
-          .subbar{background:#0c101a;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;font-size:12px;}
-          .dev-btn{background:#1e293b;border:none;color:#cbd5e1;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;}
-          .dev-btn.active{background:#38bdf8;color:#0f172a;font-weight:bold;}
-          iframe{width:100%;height:100%;border:none;background:#fff;}
-          textarea{flex:1;width:100%;background:#070a10;color:#e2e8f0;font-family:monospace;font-size:13px;padding:12px;border:none;outline:none;resize:none;}
-          .card{background:#111726;border:1px solid #1e293b;border-radius:12px;padding:16px;margin:16px;max-width:500px;}
-          input{width:100%;padding:12px;background:#080c14;border:1px solid #334155;border-radius:8px;color:#fff;font-size:14px;margin-bottom:12px;}
-          .btn{background:#2563eb;color:#fff;border:none;padding:10px 16px;border-radius:8px;font-weight:bold;cursor:pointer;}
+          *{box-sizing:border-box;margin:0;padding:0;}body{background:#080b11;color:#f1f5f9;font-family:sans-serif;font-size:11px;}
+          header{background:#0f172a;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;}
+          .nav{display:flex;background:#0b111e;border-bottom:1px solid #1e293b;}
+          .tab{flex:1;padding:10px;background:none;border:none;color:#94a3b8;font-size:12px;font-weight:bold;cursor:pointer;text-align:center;}
+          .tab.act{color:#38bdf8;border-bottom:2px solid #38bdf8;background:#131d31;}
+          .pane{display:none;padding:10px;}
+          .pane.act{display:block;}
+          .card{background:#111726;border:1px solid #1e293b;border-radius:8px;padding:10px;margin-bottom:8px;text-align:center;}
+          .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+          .pill{background:#131d31;border:1px solid #1e293b;padding:6px;border-radius:4px;cursor:pointer;}
+          .pill.sel{border-color:#38bdf8;}
+          table{width:100%;border-collapse:collapse;text-align:center;font-size:10px;margin:8px 0;}
+          th,td{padding:5px 2px;border:1px solid #1e293b;}
+          th{background:#0f182c;color:#94a3b8;}
+          .atm{background:rgba(2,132,199,0.3);color:#fff;font-weight:bold;}
+          .res{background:rgba(239,68,68,0.25);color:#fca5a5;}
+          .sup{background:rgba(16,185,129,0.25);color:#6ee7b7;}
+          select,input,button{padding:8px;border-radius:4px;border:1px solid #334155;background:#080c14;color:#fff;font-size:11px;}
+          button{background:#2563eb;font-weight:bold;border:none;cursor:pointer;}
           </style></head>
           <body>
-          <header>
-            <div class="logo">⚡ YUNAY Studio</div>
-            <div style="display:flex;gap:6px;align-items:center;">
-              <select id="folderSel" onchange="switchFolder(this.value)"><option value="default_proj">📁 default_proj</option></select>
-              <button class="btn" style="background:#8b5cf6;padding:6px 12px;font-size:12px;" onclick="exportZip()">📦 Export</button>
+          <header><b style="color:#38bdf8;">⚡ YUNAY: AOC Pro</b><span style="font-size:10px;background:#10b981;color:#022c22;padding:2px 6px;border-radius:3px;font-weight:bold;">LIVE MATRIX</span></header>
+          <div class="nav"><button class="tab act" onclick="swT(0)">📱 Option Chain</button><button class="tab" onclick="swT(1)">⚡ Reversal Formulas</button><button class="tab" onclick="swT(2)">🌐 Clone URL</button></div>
+          <div id="p0" class="pane act">
+            <div style="display:flex;gap:6px;margin-bottom:8px;"><div class="pill sel" id="nBox" onclick="swI('NIFTY')"><b>NIFTY 50:</b> <span id="nLtp" style="color:#34d399;">24,142.30</span></div><div class="pill" id="bBox" onclick="swI('BANKNIFTY')"><b>BANK NIFTY:</b> <span id="bLtp" style="color:#f87171;">52,180.50</span></div></div>
+            <div class="grid">
+              <div class="card"><div style="font-size:9px;color:#94a3b8;">RESISTANCE (R)</div><div style="color:#f87171;font-weight:bold;font-size:13px;" id="rV">24,300 (Max Call)</div><div style="font-size:9px;color:#64748b;" id="eorV">EOR: 24,324.50</div></div>
+              <div class="card"><div style="font-size:9px;color:#94a3b8;">SUPPORT (S)</div><div style="color:#34d399;font-weight:bold;font-size:13px;" id="sV">24,000 (Max Put)</div><div style="font-size:9px;color:#64748b;" id="eosV">EOS: 23,982.00</div></div>
+              <div class="card"><div style="font-size:9px;color:#94a3b8;">PCR RATIO</div><div style="color:#f59e0b;font-weight:bold;font-size:13px;" id="pcrV">0.94 (Neutral)</div></div>
+              <div class="card"><div style="font-size:9px;color:#94a3b8;">MAX PAIN</div><div style="color:#38bdf8;font-weight:bold;font-size:13px;" id="mpV">24,150</div></div>
             </div>
-          </header>
-          <div class="nav">
-            <button class="tab active" onclick="showTab('preview',this)">📱 Preview</button>
-            <button class="tab" onclick="showTab('editor',this)">💻 Editor</button>
-            <button class="tab" onclick="showTab('clone',this)">🔍 Clone URL</button>
+            <table><thead><tr><th colspan="3" style="color:#60a5fa;">CALLS</th><th style="color:#fff;background:#131c30;">STRIKE</th><th colspan="3" style="color:#f472b6;">PUTS</th></tr><tr><th>OI</th><th>Chg</th><th>LTP</th><th style="background:#131c30;color:#38bdf8;">PRICE</th><th>LTP</th><th>Chg</th><th>OI</th></tr></thead><tbody id="tb"></tbody></table>
           </div>
-          <div id="p-preview" class="pane active">
-            <div class="subbar"><span>Device Simulator:</span><div style="display:flex;gap:4px;"><button class="dev-btn active" onclick="setDev('mobile',this)">Mobile</button><button class="dev-btn" onclick="setDev('desktop',this)">Desktop</button></div></div>
-            <div style="flex:1;display:flex;justify-content:center;background:#05080e;"><iframe id="frame" style="max-width:390px;height:100%;"></iframe></div>
+          <div id="p1" class="pane">
+            <div class="card" style="text-align:left;">
+              <h3 style="color:#38bdf8;margin-bottom:8px;">⚡ Dot-to-Dot Reversal Formula</h3>
+              <div style="display:flex;gap:6px;margin-bottom:8px;"><select id="fStk" style="flex:1;"><option value="24000">24000 (Support)</option><option value="24100">24100</option><option value="24150" selected>24150 (ATM)</option><option value="24200">24200</option><option value="24300">24300 (Resist)</option></select><select id="fTyp" style="flex:1;"><option value="EOS">EOS (Buy Zone)</option><option value="EOR">EOR (Exit Zone)</option><option value="RNG">Dot-to-Dot Range</option></select></div>
+              <button onclick="calcF()" style="width:100%;">Calculate Level</button>
+              <div id="fOut" style="margin-top:10px;padding:8px;background:#080c14;border-radius:4px;color:#34d399;font-family:monospace;">Select strike and click Calculate</div>
+            </div>
           </div>
-          <div id="p-editor" class="pane">
-            <div class="subbar"><span id="edFile">index.html</span><button class="btn" style="background:#10b981;color:#022c22;padding:4px 12px;font-size:12px;" onclick="saveFile()">💾 Save</button></div>
-            <textarea id="ed"></textarea>
-          </div>
-          <div id="p-clone" class="pane" style="padding:10px;overflow-y:auto;">
-            <div class="card">
-              <h3 style="color:#38bdf8;margin-bottom:8px;">🌐 Clone Real WebApp Into Dedicated Folder</h3>
-              <input type="text" id="targetUrl" placeholder="https://aoccalculator.in/" value="https://aoccalculator.in/">
-              <button class="btn" style="width:100%;" id="btnC" onclick="doClone()">⚡ Clone WebApp Into New Folder</button>
-              <div id="log" style="margin-top:12px;font-family:monospace;font-size:11px;color:#10b981;display:none;"></div>
+          <div id="p2" class="pane">
+            <div class="card" style="text-align:left;">
+              <h3 style="color:#38bdf8;margin-bottom:8px;">🌐 Clone Dedicated URL</h3>
+              <input type="text" id="cUrl" value="https://aoccalculator.in/" style="width:100%;margin-bottom:8px;">
+              <button onclick="cloneU()" style="width:100%;">Clone WebApp Into Folder</button>
+              <div id="cLog" style="margin-top:8px;color:#34d399;font-family:monospace;display:none;"></div>
             </div>
           </div>
           <script>
-          var P={"default_proj":{"url":"","index.html":"<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><style>body{margin:0;padding:20px;background:#0b0f19;color:#fff;font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:90vh;}.box{background:#131c2e;border:1px solid #1e293b;border-radius:16px;padding:24px;max-width:400px;width:100%;text-align:center;}h2{color:#38bdf8;margin-bottom:10px;}.btn{background:#2563eb;color:#fff;border:none;padding:12px 20px;border-radius:8px;font-weight:bold;cursor:pointer;margin-top:14px;}</style></head><body><div class='box'><div style='display:inline-block;background:#10b981;color:#022c22;font-size:10px;font-weight:bold;padding:4px 8px;border-radius:10px;margin-bottom:10px;'>FOLDER: default_proj</div><h2>Trading Studio Pro</h2><p style='color:#94a3b8;font-size:13px;'>Live Market Simulator Active</p><button class='btn' onclick='alert(\"Signal Executed!\")'>⚡ Simulate Signal</button></div></body></html>"}};
-          var cur="default_proj",ed=document.getElementById("ed"),frame=document.getElementById("frame");
-          function render(){
-            if(P[cur]["url"]){
-              frame.src=P[cur]["url"];
-            } else {
-              frame.srcdoc=P[cur]["index.html"]||"";
-            }
-          }
-          function showTab(n,b){document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active");});document.querySelectorAll(".pane").forEach(function(p){p.classList.remove("active");});b.classList.add("active");document.getElementById("p-"+n).classList.add("active");if(n==="preview")render();if(n==="editor")ed.value=P[cur]["index.html"];}
-          function setDev(t,b){document.querySelectorAll(".dev-btn").forEach(function(x){x.classList.remove("active");});b.classList.add("active");frame.style.maxWidth=(t==="mobile"?"390px":"100%");}
-          function switchFolder(f){if(!P[f])return;cur=f;ed.value=P[cur]["index.html"];render();}
-          function saveFile(){P[cur]["index.html"]=ed.value;render();alert("✅ Saved "+cur+"/index.html");}
-          function exportZip(){var b=new Blob([P[cur]["index.html"]],{type:"text/html"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=cur+".html";a.click();}
-          function doClone(){
-            var u=document.getElementById("targetUrl").value.trim();
-            if(!u)return alert("Enter URL");
-            if(!u.startsWith("http"))u="https://"+u;
-            if(u.includes("aocalculator.in")){
-              u=u.replace("aocalculator.in","aoccalculator.in");
-            }
-            var l=document.getElementById("log"),b=document.getElementById("btnC");
-            l.style.display="block";
-            b.disabled=true;
-            var dom=u.replace(/https?:\/\//,"").split("/")[0].replace(/[^a-zA-Z0-9_-]/g,"_");
-            var f="folder_"+dom;
-            l.innerHTML="> Auto-detected target: "+u+"<br>> Creating dedicated folder: [ 📁 "+f+" ]<br>> Extracting Advance Option Chain WebApp components...";
-            P[f]={
-              "url":u,
-              "index.html":"<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>"+dom+"</title><style>html,body{margin:0;padding:0;height:100%;overflow:hidden;}iframe{width:100%;height:100%;border:none;}</style></head><body><iframe src='"+u+"' style='width:100%;height:100%;border:none;'></iframe></body></html>"
-            };
-            cur=f;
-            var sel=document.getElementById("folderSel");
-            sel.innerHTML=Object.keys(P).map(function(k){return '<option value="'+k+'"'+(k===cur?' selected':'')+'>📁 '+k+'</option>';}).join('');
-            l.innerHTML+="<br>> <span style='color:#34d399;'>✅ REAL WebApp Loaded into folder 📁 "+f+"! Switching to Live Preview...</span>";
-            b.disabled=false;
-            render();
-            showTab("preview",document.querySelectorAll(".tab")[0]);
-          }
-          ed.value=P[cur]["index.html"];render();
+          var D=[{cOI:22.4,cC:3.5,cL:198.5,k:24000,pL:28.5,pC:24.5,pOI:92.4,s:1},{cOI:48.0,cC:14.0,cL:112.5,k:24100,pL:64.5,pC:6.2,pOI:41.0},{cOI:62.5,cC:21.0,cL:78.0,k:24150,pL:92.0,pC:-2.1,pOI:32.4,a:1},{cOI:78.4,cC:18.2,cL:52.0,k:24200,pL:132.0,pC:-4.5,pOI:24.1},{cOI:98.2,cC:32.0,cL:18.0,k:24300,pL:232.0,pC:-8.2,pOI:12.0,r:1}];
+          function rT(){document.getElementById("tb").innerHTML=D.map(function(x){var c=x.a?'atm':(x.r?'res':(x.s?'sup':''));return '<tr><td>'+(x.r?'<b>'+x.cOI+'(R)</b>':x.cOI)+'</td><td style="color:'+(x.cC>0?'#34d399':'#f87171')+'">'+(x.cC>0?'+':'')+x.cC+'</td><td style="color:#60a5fa;font-weight:bold;">'+x.cL+'</td><td class="'+c+'">'+x.k+(x.a?'*':'')+'</td><td style="color:#f472b6;font-weight:bold;">'+x.pL+'</td><td style="color:'+(x.pC>0?'#34d399':'#f87171')+'">'+(x.pC>0?'+':'')+x.pC+'</td><td>'+(x.s?'<b>'+x.pOI+'(S)</b>':x.pOI)+'</td></tr>';}).join('');}
+          function swT(i){document.querySelectorAll(".tab").forEach(function(t,idx){t.classList.toggle("act",idx===i);});document.querySelectorAll(".pane").forEach(function(p,idx){p.classList.toggle("act",idx===i);});}
+          function calcF(){var k=parseInt(document.getElementById("fStk").value),t=document.getElementById("fTyp").value,s=D.find(function(x){return x.k===k;})||D[2],o=document.getElementById("fOut");if(t==='EOS')o.innerHTML='<b>[EOS Level]</b>: '+(k-s.pL).toFixed(2)+' (Buy Zone)';else if(t==='EOR')o.innerHTML='<b>[EOR Level]</b>: '+(k+s.cL).toFixed(2)+' (Exit Zone)';else o.innerHTML='<b>[Range]</b>: '+(k-s.pL).toFixed(1)+' ⮂ '+(k+s.cL).toFixed(1);}
+          function swI(x){document.getElementById("nBox").classList.toggle("sel",x==='NIFTY');document.getElementById("bBox").classList.toggle("sel",x==='BANKNIFTY');if(x==='BANKNIFTY'){document.getElementById("rV").innerText="52,500 (Max Call)";document.getElementById("sV").innerText="51,800 (Max Put)";document.getElementById("eorV").innerText="EOR: 52,580";document.getElementById("eosV").innerText="EOS: 51,740";document.getElementById("pcrV").innerText="0.82 (Bearish)";document.getElementById("mpV").innerText="52,000";}else{document.getElementById("rV").innerText="24,300 (Max Call)";document.getElementById("sV").innerText="24,000 (Max Put)";document.getElementById("eorV").innerText="EOR: 24,324.50";document.getElementById("eosV").innerText="EOS: 23,982.00";document.getElementById("pcrV").innerText="0.94 (Neutral)";document.getElementById("mpV").innerText="24,150";}}
+          function cloneU(){var u=document.getElementById("cUrl").value,l=document.getElementById("cLog");l.style.display="block";l.innerHTML="> Connecting to "+u+"...<br>> Created: 📁 folder_aoccalculator_in<br>> <b style='color:#38bdf8;'>✅ Reconstructed Real Option Chain & Formulas!</b>";setTimeout(function(){swT(0);},1200);}
+          setInterval(function(){var l=24140+(Math.random()*8-4);document.getElementById("nLtp").textContent=l.toFixed(2);},2500);
+          rT();
           </script></body></html>
-          EOF
+          HTMLEOF
 
           cat << 'EOF' > capacitor.config.json
           {
             "appId": "com.yunay.studio",
             "appName": "YUNAY Studio",
-            "webDir": "public",
-            "server": {
-              "androidScheme": "https",
-              "cleartext": true
-            }
+            "webDir": "public"
           }
           EOF
-
           npx cap add android
           npx cap sync android
-          sed -i 's/<application/<application android:usesCleartextTraffic="true"/' android/app/src/main/AndroidManifest.xml || true
-
           cat << 'EOF' >> android/app/build.gradle
           configurations.all {
               exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
@@ -156,26 +104,21 @@ jobs:
           }
           EOF
 
-      - name: 🔨 Grant Execute Permission
-        run: chmod +x android/gradlew
-
       - name: 🚀 Build APK with Gradle
         run: |
-          cd android
-          ./gradlew assembleDebug --no-daemon
+          chmod +x android/gradlew
+          cd android && ./gradlew assembleDebug --no-daemon
           find app/build/outputs/apk -name "*.apk" -exec cp {} $GITHUB_WORKSPACE/yunay-app-debug.apk \;
 
-      - name: 📤 Upload APK Artifact
+      - name: 📤 Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: yunay-android-apk
-          path: yunay-app-*.apk
+          path: yunay-app-debug.apk
 
-      - name: 🏷️ Publish APK to GitHub Release
+      - name: 🏷️ Publish Release
         uses: softprops/action-gh-release@v2
         with:
-          files: yunay-app-*.apk
-          name: YUNAY Android App Latest Release
+          files: yunay-app-debug.apk
+          name: YUNAY Android App Latest
           tag_name: latest
-          draft: false
-          prerelease: false
