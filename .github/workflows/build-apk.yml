@@ -42,7 +42,7 @@ jobs:
           # 1. Create public directory
           mkdir -p public
 
-          # 2. Write complete YUNAY Studio WebApp UI with Real Live Web Cloner
+          # 2. Write Multi-Folder YUNAY Studio WebApp UI
           cat << 'EOF' > public/index.html
           <!DOCTYPE html>
           <html lang="en">
@@ -53,9 +53,10 @@ jobs:
             <style>
               * { box-sizing: border-box; margin: 0; padding: 0; }
               body { background: #0a0d14; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-              header { background: #111726; border-bottom: 1px solid #1e293b; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
-              .logo { font-size: 17px; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 8px; }
-              .badge { background: #10b981; color: #022c22; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 12px; }
+              header { background: #111726; border-bottom: 1px solid #1e293b; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+              .logo { font-size: 16px; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 6px; }
+              .badge { background: #10b981; color: #022c22; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+              .folder-select { background: #080c14; border: 1px solid #334155; color: #38bdf8; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; outline: none; }
               .nav-tabs { display: flex; background: #080c14; border-bottom: 1px solid #1e293b; }
               .tab-btn { flex: 1; padding: 12px; background: transparent; border: none; color: #94a3b8; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; border-bottom: 2px solid transparent; }
               .tab-btn.active { color: #38bdf8; border-bottom-color: #38bdf8; background: #111726; }
@@ -83,7 +84,13 @@ jobs:
           <body>
             <header>
               <div class="logo">⚡ YUNAY Studio <span class="badge">PRO</span></div>
-              <button onclick="exportProjectZip()" style="background:#8b5cf6; border:none; color:#fff; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">📦 Export</button>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:11px; color:#94a3b8;">FOLDER:</span>
+                <select id="folderSelect" class="folder-select" onchange="switchFolder(this.value)">
+                  <option value="default_project">📁 default_project</option>
+                </select>
+                <button onclick="exportProjectZip()" style="background:#8b5cf6; border:none; color:#fff; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">📦 Export</button>
+              </div>
             </header>
             <div class="nav-tabs">
               <button class="tab-btn active" onclick="switchTab('preview', this)">📱 Live Preview</button>
@@ -119,265 +126,15 @@ jobs:
               <div class="scanner-box">
                 <div class="card">
                   <h3>🌐 Reverse Engineer & Clone WebApp</h3>
-                  <p>Enter any URL to clone layout, detect frameworks, and reconstruct source code.</p>
+                  <p>Enter any URL to clone into a NEW dedicated folder with separate source files.</p>
                   <input type="text" id="targetUrl" placeholder="https://aocalculator.in/" value="https://aocalculator.in/">
-                  <button class="btn-action" id="btnClone" onclick="cloneWebsite()">⚡ Start Reverse Engineering</button>
+                  <button class="btn-action" id="btnClone" onclick="cloneWebsite()">⚡ Clone Into New Folder</button>
                   <div id="scanLog" class="log-box"></div>
                 </div>
               </div>
             </div>
             <script>
-              var files = {
-                "index.html": "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><link rel=\"stylesheet\" href=\"styles.css\"></head><body><div class=\"app-card\"><div class=\"chip\">YUNAY RECONSTRUCTED</div><h2>Trading Studio Pro</h2><p>Live Real-Time Market Simulator</p><div class=\"metric\"><span>BTC/USDT</span><span id=\"priceDisplay\" style=\"color:#34d399;font-weight:bold;\">$94,320.50</span></div><button class=\"btn-action\" onclick=\"simulateTrade()\">Simulate Live Signal</button><div id=\"tradeLog\" style=\"margin-top:12px;color:#10b981;font-family:monospace;font-size:12px;\">System initialized and connected.</div></div><script src=\"app.js\"><" + "/script></body></html>",
-                "styles.css": "body { margin:0; padding:16px; background:#0b0f19; color:#f8fafc; font-family:sans-serif; display:flex; justify-content:center; align-items:center; min-height:90vh; } .app-card { background:#131c2e; border:1px solid #1e293b; border-radius:16px; padding:24px; width:100%; max-width:420px; box-shadow:0 12px 36px rgba(0,0,0,0.6); } .chip { display:inline-block; background:#10b981; color:#022c22; font-size:10px; font-weight:800; padding:4px 10px; border-radius:12px; margin-bottom:12px; } h2 { margin:0 0 4px; font-size:24px; color:#38bdf8; } p { color:#94a3b8; font-size:13px; margin-bottom:20px; } .metric { background:#0a0d14; border:1px solid #1e293b; border-radius:10px; padding:14px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; } .btn-action { width:100%; background:#2563eb; color:#fff; border:none; padding:12px; border-radius:8px; font-weight:700; cursor:pointer; font-size:14px; }",
-                "app.js": "function simulateTrade() { var p = (94000 + Math.random() * 800).toFixed(2); document.getElementById('priceDisplay').textContent = '$' + p; document.getElementById('tradeLog').textContent = '[YUNAY Signal] Executed at ' + new Date().toLocaleTimeString(); }"
-              };
-              var activeFile = "index.html";
-              var editor = document.getElementById("codeEditor");
-
-              function renderPreview() {
-                var h = files["index.html"] || "";
-                var c = files["styles.css"] || "";
-                var j = files["app.js"] || "";
-                var doc = h;
-                if (!doc.includes("<style>") && c) {
-                  doc = doc.replace(/<link rel="stylesheet"[^>]*>/i, "<style>" + c + "</style>");
-                }
-                if (!doc.includes(j) && j) {
-                  doc = doc.replace(/<script src="app.js"><\/script>/i, "<script>" + j + "<\/script>");
-                }
-                document.getElementById("previewFrame").srcdoc = doc;
-              }
-
-              function switchTab(name, btn) {
-                document.querySelectorAll(".tab-btn").forEach(function(b){ b.classList.remove("active"); });
-                document.querySelectorAll(".tab-content").forEach(function(c){ c.classList.remove("active"); });
-                btn.classList.add("active");
-                document.getElementById("tab-" + name).classList.add("active");
-                if (name === "preview") renderPreview();
-                if (name === "editor") {
-                  editor.value = files[activeFile] || "";
-                }
-              }
-
-              function setDevice(type, btn) {
-                document.querySelectorAll(".device-btn").forEach(function(b){ b.classList.remove("active"); });
-                btn.classList.add("active");
-                var f = document.getElementById("previewFrame");
-                if (type === "mobile") { f.style.maxWidth = "390px"; f.style.height = "680px"; }
-                else if (type === "tablet") { f.style.maxWidth = "768px"; f.style.height = "700px"; }
-                else { f.style.maxWidth = "100%"; f.style.height = "100%"; }
-              }
-
-              function switchFile(fileName, pill) {
-                files[activeFile] = editor.value;
-                activeFile = fileName;
-                document.querySelectorAll(".file-pill").forEach(function(p){ p.classList.remove("active"); });
-                pill.classList.add("active");
-                editor.value = files[fileName] || "";
-                document.getElementById("editorStatus").textContent = "Editing " + fileName;
-              }
-
-              function saveCurrentFile() {
-                files[activeFile] = editor.value;
-                renderPreview();
-                document.getElementById("editorStatus").textContent = "Saved at " + new Date().toLocaleTimeString();
-                alert("✅ Saved! Live Preview updated.");
-              }
-
-              function exportProjectZip() {
-                var b = new Blob([files["index.html"]], { type: "text/html" });
-                var a = document.createElement("a");
-                a.href = URL.createObjectURL(b);
-                a.download = "yunay-cloned-app.html";
-                a.click();
-              }
-
-              async function cloneWebsite() {
-                var url = document.getElementById("targetUrl").value.trim();
-                if (!url) return alert("Please enter a valid URL");
-                if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                  url = "https://" + url;
-                }
-                var log = document.getElementById("scanLog");
-                var btn = document.getElementById("btnClone");
-                log.style.display = "block";
-                btn.disabled = true;
-                btn.textContent = "Cloning & Extracting...";
-                log.innerHTML = "> Connecting to " + url + "...<br>> Fetching live DOM & stylesheets...";
-
-                var cleanHtml = "";
-                var proxies = [
-                  "https://api.allorigins.win/raw?url=" + encodeURIComponent(url),
-                  "https://corsproxy.io/?" + encodeURIComponent(url),
-                  "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(url)
-                ];
-
-                for (var i = 0; i < proxies.length; i++) {
-                  try {
-                    log.innerHTML += "<br>> Attempting gateway " + (i + 1) + "...";
-                    var res = await fetch(proxies[i]);
-                    if (res.ok) {
-                      var text = await res.text();
-                      if (text && text.length > 200) {
-                        cleanHtml = text;
-                        break;
-                      }
-                    }
-                  } catch (e) {}
-                }
-
-                if (cleanHtml && cleanHtml.length > 200) {
-                  log.innerHTML += "<br>> Extracted " + (cleanHtml.length / 1024).toFixed(1) + " KB source code!";
-                  var origin = new URL(url).origin;
-                  cleanHtml = cleanHtml.replace(/(href|src)=["'](\/[^"']*)["']/gi, function(m, attr, path) {
-                    if (path.startsWith("//")) return attr + '="https:' + path + '"';
-                    return attr + '="' + origin + path + '"';
-                  });
-                  if (!cleanHtml.includes("<base ")) {
-                    cleanHtml = cleanHtml.replace(/<head>/i, '<head><base href="' + origin + '/">');
-                  }
-                  files["index.html"] = cleanHtml;
-                  log.innerHTML += "<br>> <span style=\"color:#34d399;\">✅ Real WebApp Cloned Successfully! Switching to Live Preview...</span>";
-                  setTimeout(function() {
-                    btn.disabled = false;
-                    btn.textContent = "⚡ Start Reverse Engineering";
-                    switchTab("preview", document.querySelectorAll(".tab-btn")[0]);
-                  }, 1200);
-                  return;
-                }
-
-                // Interactive Functional Calculator Reconstruction Fallback
-                var domain = url.replace(/https?:\/\//, "").split("/")[0];
-                log.innerHTML += "<br>> Generating interactive calculation engine for " + domain + "...";
-                files["index.html"] = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>${domain} - Reconstructed</title>
-  <style>
-    body { margin:0; padding:16px; background:#0b0f19; color:#f8fafc; font-family:-apple-system,sans-serif; display:flex; justify-content:center; align-items:center; min-height:90vh; }
-    .calc-card { background:#131c2e; border:1px solid #1e293b; border-radius:16px; padding:24px; width:100%; max-width:440px; box-shadow:0 12px 36px rgba(0,0,0,0.6); }
-    .badge { display:inline-block; background:#10b981; color:#022c22; font-size:10px; font-weight:800; padding:4px 10px; border-radius:12px; margin-bottom:12px; }
-    h2 { margin:0 0 4px; font-size:24px; color:#38bdf8; }
-    p { color:#94a3b8; font-size:13px; margin-bottom:20px; }
-    .input-group { margin-bottom:14px; }
-    label { display:block; font-size:12px; color:#94a3b8; margin-bottom:6px; font-weight:600; }
-    input { width:100%; padding:12px; background:#080c14; border:1px solid #334155; border-radius:8px; color:#fff; font-size:16px; box-sizing:border-box; outline:none; }
-    input:focus { border-color:#38bdf8; }
-    .btn-calc { width:100%; background:#2563eb; color:#fff; border:none; padding:14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:15px; margin-top:8px; }
-    .result-box { margin-top:16px; background:#070a10; border:1px solid #10b981; padding:16px; border-radius:8px; text-align:center; }
-    .result-title { font-size:12px; color:#94a3b8; }
-    .result-val { font-size:26px; font-weight:800; color:#34d399; margin-top:4px; }
-  </style>
-</head>
-<body>
-  <div class="calc-card">
-    <div class="badge">⚡ YUNAY REAL RECONSTRUCTION</div>
-    <h2>${domain}</h2>
-    <p>Age & Calculation Engine</p>
-    <div class="input-group">
-      <label>Date of Birth / Primary Value:</label>
-      <input type="date" id="dobInput" value="2000-01-01">
-    </div>
-    <div class="input-group">
-      <label>Target Date / Calculation Basis:</label>
-      <input type="date" id="targetDate">
-    </div>
-    <button class="btn-calc" onclick="calculate()">⚡ Calculate Result</button>
-    <div class="result-box" id="resultBox">
-      <div class="result-title">CALCULATED VALUE</div>
-      <div class="result-val" id="resDisplay">Ready</div>
-    </div>
-  </div>
-  <script>
-    document.getElementById('targetDate').valueAsDate = new Date();
-    function calculate() {
-      var d1 = new Date(document.getElementById('dobInput').value);
-      var d2 = new Date(document.getElementById('targetDate').value);
-      var diffYears = Math.floor((d2 - d1) / (365.25 * 24 * 60 * 60 * 1000));
-      var diffDays = Math.floor((d2 - d1) / (24 * 60 * 60 * 1000));
-      document.getElementById('resDisplay').textContent = diffYears + " Years (" + diffDays + " Days)";
-    }
-  <\/script>
-</body>
-</html>`;
-                log.innerHTML += "<br>> <span style=\"color:#34d399;\">✅ Reconstructed Interactive App! Switching to Live Preview...</span>";
-                setTimeout(function() {
-                  btn.disabled = false;
-                  btn.textContent = "⚡ Start Reverse Engineering";
-                  switchTab("preview", document.querySelectorAll(".tab-btn")[0]);
-                }, 1000);
-              }
-
-              editor.value = files[activeFile];
-              renderPreview();
-            </script>
-          </body>
-          </html>
-          EOF
-
-          # 3. Create capacitor.config.json
-          cat << 'EOF' > capacitor.config.json
-          {
-            "appId": "com.yunay.studio",
-            "appName": "YUNAY Studio",
-            "webDir": "public",
-            "server": {
-              "androidScheme": "https",
-              "cleartext": true
-            }
-          }
-          EOF
-
-          # 4. Add Android platform and copy web assets
-          npx cap add android
-          npx cap sync android
-
-          # 5. Enable cleartext traffic
-          sed -i 's/<application/<application android:usesCleartextTraffic="true"/' android/app/src/main/AndroidManifest.xml || true
-
-          # 6. Fix duplicate Kotlin stdlib classes
-          cat << 'EOF' >> android/build.gradle
-
-          allprojects {
-              configurations.all {
-                  exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
-                  exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
-              }
-          }
-          EOF
-
-          cat << 'EOF' >> android/app/build.gradle
-
-          configurations.all {
-              exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
-              exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
-          }
-          EOF
-
-      - name: 🔨 Grant Execute Permission for Gradlew
-        run: chmod +x android/gradlew
-
-      - name: 🚀 Build APK with Gradle
-        run: |
-          cd android
-          ./gradlew assembleDebug --no-daemon
-          find app/build/outputs/apk -name "*.apk" -exec cp {} $GITHUB_WORKSPACE/yunay-app-debug.apk \;
-
-      - name: 📤 Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: yunay-android-apk
-          path: yunay-app-*.apk
-
-      - name: 🏷️ Publish APK to GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: yunay-app-*.apk
-          name: YUNAY Android App Latest Release
-          tag_name: latest
-          draft: false
-          prerelease: false
-          generate_release_notes: true
+              var projects = {
+                "default_project": {
+                  "index.html": "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><link rel=\"stylesheet\" href=\"styles.css\"></head><body><div class=\"app-card\"><div class=\"chip\">FOLDER: default_project</div><h2>YUNAY Trading Studio</h2><p>Live Real-Time Market Simulator</p><div class=\"metric\"><span>BTC/USDT</span><span id=\"priceDisplay\" style=\"color:#34d399;font-weight:bold;\">$94,320.50</span></div><button class=\"btn-action\" onclick=\"simulateTrade()\">Simulate Live Signal</button><div id=\"tradeLog\" style=\"margin-top:12px;color:#10b981;font-family:monospace;font-size:12px;\">System initialized and connected.</div></div><script src=\"app.js\"><" + "/script></body></html>",
+                  "styles.css": "body { margin:0; padding:16px; background:#0b0f19; color:#f8fafc; font-family:sans-serif; display:flex; justify-content:center; align-items:center; min-height:90vh; } .app-card { background:#131c2e; border:1px solid #1e293b; border-radius:16px; padding:24px; width:100%; max-width:420px; box-shadow:0 12px 36px rgba(0,0,0,0.6); } .chip { display:inline-block; background:#10b981; color:#022c22; font-size:10px; font-weight:800; padding:4px 10px; border-radius:12px; margin-bottom:12px; } h2 { margin:0 0 4px; font-size:24px; color:#38bdf8; }
