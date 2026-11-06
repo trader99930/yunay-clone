@@ -20,6 +20,9 @@ const upload = multer({ dest: "uploads/" });
 // Static serving for reconstructed apps
 app.use("/preview", express.static(path.join(__dirname, "workspace/reconstructed")));
 
+// Static dashboard (served at /)
+app.use(express.static(path.join(__dirname, "public")));
+
 app.get("/api/status", (req, res) => {
   res.json({ status: "online", stepsCompleted: [1, 2, 3, 4, 5, 6, 7, 8] });
 });

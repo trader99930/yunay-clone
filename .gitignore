@@ -1,1 +1,9 @@
 node_modules/
+dist/
+
+# generated at runtime
+uploads/*
+!uploads/.gitkeep
+workspace/apk_extracted/*
+workspace/extracted/*
+workspace/reconstructed/*

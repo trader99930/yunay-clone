@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YUNAY — Webapp Clone Engine</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2338bdf8'/%3E%3Ctext x='16' y='23' font-family='Arial' font-size='20' font-weight='bold' text-anchor='middle' fill='%2304121d'%3EY%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">Y</div>
+      <div>
+        <h1>YUNAY</h1>
+        <p>Webapp Reverse Engineering &amp; Clone Engine</p>
+      </div>
+    </div>
+    <div class="status" id="status"><span class="dot"></span><span id="status-text">checking…</span></div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <span class="eyebrow">STEP 1 → 8</span>
+      <h2>Kisi bhi webapp ko scan karo, samjho, aur clone karo.</h2>
+      <p>URL scan, ZIP project analysis, APK inspection aur AI reconstruction — sab ek dashboard se.</p>
+    </section>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="web" role="tab">🌐 Website Clone</button>
+      <button class="tab" data-tab="zip" role="tab">🗜️ ZIP Project</button>
+      <button class="tab" data-tab="apk" role="tab">📱 APK</button>
+    </nav>
+
+    <!-- ============ WEB ============ -->
+    <section id="tab-web" class="panel active">
+      <form id="scan-form" class="card">
+        <label for="url">Target URL</label>
+        <div class="row">
+          <input id="url" type="url" placeholder="https://example.com" autocomplete="off" required />
+          <button type="submit" class="btn primary" id="scan-btn">Scan Website</button>
+        </div>
+        <p class="hint">Root URL daalo (sub-page nahi). Scan me 10–45 sec lag sakte hain.</p>
+      </form>
+
+      <div id="web-error" class="alert hidden"></div>
+
+      <div id="web-result" class="hidden">
+        <div class="card result-head">
+          <div>
+            <span class="eyebrow">SCAN REPORT</span>
+            <h3 id="web-title">—</h3>
+            <a id="web-url" class="muted" href="#" target="_blank" rel="noopener">—</a>
+          </div>
+          <div class="stack" id="web-stack"></div>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <h4>Overview</h4>
+            <dl class="stats" id="web-stats"></dl>
+          </div>
+          <div class="card">
+            <h4>Screenshot</h4>
+            <div class="shot-wrap">
+              <img id="web-shot" alt="Website screenshot" />
+            </div>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <h4>Assets</h4>
+            <div id="web-assets" class="asset-list"></div>
+          </div>
+          <div class="card">
+            <h4>Detected API calls</h4>
+            <div id="web-apis" class="asset-list"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4>Reconstruct this webapp</h4>
+          <div class="row">
+            <input id="project-name" type="text" placeholder="project-name" value="yunay-reconstructed-app" />
+            <input id="recon-prompt" type="text" placeholder="Prompt (optional): rebuild the landing page" />
+            <button type="button" class="btn accent" id="recon-btn">Reconstruct</button>
+          </div>
+          <p class="hint">Reconstruction ka output <code>/preview/&lt;build&gt;/</code> par serve hota hai.</p>
+        </div>
+
+        <div id="build-result" class="card hidden">
+          <div class="build-head">
+            <div>
+              <span class="eyebrow">BUILD READY</span>
+              <h4 id="build-id">—</h4>
+              <p class="muted" id="build-meta"></p>
+            </div>
+            <a id="build-link" class="btn primary" href="#" target="_blank" rel="noopener">Open in new tab ↗</a>
+          </div>
+          <iframe id="build-frame" title="Reconstructed preview"></iframe>
+        </div>
+
+        <details class="card raw">
+          <summary>Raw scan JSON</summary>
+          <pre id="web-raw"></pre>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ ZIP ============ -->
+    <section id="tab-zip" class="panel">
+      <form id="zip-form" class="card">
+        <label for="zip-file">Project ZIP upload karo</label>
+        <div class="row">
+          <input id="zip-file" type="file" accept=".zip,application/zip" required />
+          <button type="submit" class="btn primary" id="zip-btn">Analyze ZIP</button>
+        </div>
+        <p class="hint">node_modules, .git, dist, build automatically ignore hote hain.</p>
+      </form>
+      <div id="zip-error" class="alert hidden"></div>
+      <div id="zip-result" class="hidden">
+        <div class="card">
+          <span class="eyebrow">PROJECT REPORT</span>
+          <h3 id="zip-name">—</h3>
+          <div class="stack" id="zip-stack"></div>
+        </div>
+        <div class="grid two">
+          <div class="card"><h4>Stats</h4><dl class="stats" id="zip-stats"></dl></div>
+          <div class="card"><h4>Dependencies</h4><div id="zip-deps" class="asset-list"></div></div>
+        </div>
+        <div class="card"><h4>File tree</h4><pre id="zip-tree" class="tree"></pre></div>
+        <details class="card raw"><summary>Raw JSON</summary><pre id="zip-raw"></pre></details>
+      </div>
+    </section>
+
+    <!-- ============ APK ============ -->
+    <section id="tab-apk" class="panel">
+      <form id="apk-form" class="card">
+        <label for="apk-file">APK upload karo</label>
+        <div class="row">
+          <input id="apk-file" type="file" accept=".apk,application/vnd.android.package-archive" required />
+          <button type="submit" class="btn primary" id="apk-btn">Analyze APK</button>
+        </div>
+        <p class="hint">Manifest, permissions, framework aur extracted web assets detect honge.</p>
+      </form>
+      <div id="apk-error" class="alert hidden"></div>
+      <div id="apk-result" class="hidden">
+        <div class="card">
+          <span class="eyebrow">APK REPORT</span>
+          <h3 id="apk-pkg">—</h3>
+          <p class="muted" id="apk-version"></p>
+          <div class="stack" id="apk-stack"></div>
+        </div>
+        <div class="grid two">
+          <div class="card"><h4>Stats</h4><dl class="stats" id="apk-stats"></dl></div>
+          <div class="card"><h4>Permissions</h4><div id="apk-perms" class="asset-list"></div></div>
+        </div>
+        <div class="card"><h4>Extracted web files</h4><pre id="apk-web" class="tree"></pre></div>
+        <details class="card raw"><summary>Raw JSON</summary><pre id="apk-raw"></pre></details>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>YUNAY · local engine</span>
+    <span id="footer-status">—</span>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
