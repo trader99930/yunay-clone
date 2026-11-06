@@ -1,0 +1,8 @@
+{
+  "name": "cryptodashboard",
+  "version": "1.0.0",
+  "description": "Reconstructed by YUNAY AI Engine",
+  "scripts": {
+    "start": "npx serve ."
+  }
+}
