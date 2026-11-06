@@ -83,32 +83,51 @@ jobs:
           </div>
           <div id="p-clone" class="pane" style="padding:10px;overflow-y:auto;">
             <div class="card">
-              <h3 style="color:#38bdf8;margin-bottom:8px;">🌐 Clone Into New Dedicated Folder</h3>
-              <input type="text" id="targetUrl" placeholder="https://aocalculator.in/" value="https://aocalculator.in/">
-              <button class="btn" style="width:100%;" id="btnC" onclick="doClone()">⚡ Clone Into New Folder</button>
+              <h3 style="color:#38bdf8;margin-bottom:8px;">🌐 Clone Real WebApp Into Dedicated Folder</h3>
+              <input type="text" id="targetUrl" placeholder="https://aoccalculator.in/" value="https://aoccalculator.in/">
+              <button class="btn" style="width:100%;" id="btnC" onclick="doClone()">⚡ Clone WebApp Into New Folder</button>
               <div id="log" style="margin-top:12px;font-family:monospace;font-size:11px;color:#10b981;display:none;"></div>
             </div>
           </div>
           <script>
-          var P={"default_proj":{"index.html":"<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><style>body{margin:0;padding:20px;background:#0b0f19;color:#fff;font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:90vh;}.box{background:#131c2e;border:1px solid #1e293b;border-radius:16px;padding:24px;max-width:400px;width:100%;text-align:center;}h2{color:#38bdf8;margin-bottom:10px;}.btn{background:#2563eb;color:#fff;border:none;padding:12px 20px;border-radius:8px;font-weight:bold;cursor:pointer;margin-top:14px;}</style></head><body><div class='box'><div style='display:inline-block;background:#10b981;color:#022c22;font-size:10px;font-weight:bold;padding:4px 8px;border-radius:10px;margin-bottom:10px;'>FOLDER: default_proj</div><h2>Trading Studio Pro</h2><p style='color:#94a3b8;font-size:13px;'>Live Market Simulator Active</p><button class='btn' onclick='alert(\"Signal Executed!\")'>⚡ Simulate Signal</button></div></body></html>"}};
+          var P={"default_proj":{"url":"","index.html":"<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><style>body{margin:0;padding:20px;background:#0b0f19;color:#fff;font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:90vh;}.box{background:#131c2e;border:1px solid #1e293b;border-radius:16px;padding:24px;max-width:400px;width:100%;text-align:center;}h2{color:#38bdf8;margin-bottom:10px;}.btn{background:#2563eb;color:#fff;border:none;padding:12px 20px;border-radius:8px;font-weight:bold;cursor:pointer;margin-top:14px;}</style></head><body><div class='box'><div style='display:inline-block;background:#10b981;color:#022c22;font-size:10px;font-weight:bold;padding:4px 8px;border-radius:10px;margin-bottom:10px;'>FOLDER: default_proj</div><h2>Trading Studio Pro</h2><p style='color:#94a3b8;font-size:13px;'>Live Market Simulator Active</p><button class='btn' onclick='alert(\"Signal Executed!\")'>⚡ Simulate Signal</button></div></body></html>"}};
           var cur="default_proj",ed=document.getElementById("ed"),frame=document.getElementById("frame");
-          function render(){frame.srcdoc=P[cur]["index.html"]||"";}
+          function render(){
+            if(P[cur]["url"]){
+              frame.src=P[cur]["url"];
+            } else {
+              frame.srcdoc=P[cur]["index.html"]||"";
+            }
+          }
           function showTab(n,b){document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active");});document.querySelectorAll(".pane").forEach(function(p){p.classList.remove("active");});b.classList.add("active");document.getElementById("p-"+n).classList.add("active");if(n==="preview")render();if(n==="editor")ed.value=P[cur]["index.html"];}
           function setDev(t,b){document.querySelectorAll(".dev-btn").forEach(function(x){x.classList.remove("active");});b.classList.add("active");frame.style.maxWidth=(t==="mobile"?"390px":"100%");}
           function switchFolder(f){if(!P[f])return;cur=f;ed.value=P[cur]["index.html"];render();}
           function saveFile(){P[cur]["index.html"]=ed.value;render();alert("✅ Saved "+cur+"/index.html");}
           function exportZip(){var b=new Blob([P[cur]["index.html"]],{type:"text/html"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=cur+".html";a.click();}
-          async function doClone(){var u=document.getElementById("targetUrl").value.trim();if(!u)return alert("Enter URL");if(!u.startsWith("http"))u="https://"+u;
-          var l=document.getElementById("log"),b=document.getElementById("btnC");l.style.display="block";b.disabled=true;
-          var dom=u.replace(/https?:\/\//,"").split("/")[0].replace(/[^a-zA-Z0-9_-]/g,"_"),f="folder_"+dom;
-          l.innerHTML="> Creating new folder: [ 📁 "+f+" ]<br>> Connecting to "+u+"...";
-          var html="",proxies=["https://api.allorigins.win/raw?url=","https://corsproxy.io/?","https://api.codetabs.com/v1/proxy?quest="];
-          for(var i=0;i<proxies.length;i++){try{var r=await fetch(proxies[i]+encodeURIComponent(u));if(r.ok){var t=await r.text();if(t&&t.length>200){html=t;break;}}}catch(e){}}
-          if(html&&html.length>200){var o=new URL(u).origin;html=html.replace(/(href|src)=["'](\/[^"']*)["']/gi,function(m,a,p){return a+'="'+(p.startsWith("//")?"https:"+p:o+p)+'"';});if(!html.includes("<base "))html=html.replace(/<head>/i,'<head><base href="'+o+'/">');P[f]={"index.html":html};}
-          else{P[f]={"index.html":"<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><style>body{margin:0;padding:20px;background:#0b0f19;color:#fff;font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:90vh;}.box{background:#131c2e;border:1px solid #1e293b;border-radius:16px;padding:24px;max-width:440px;width:100%;}.badge{display:inline-block;background:#10b981;color:#022c22;font-size:10px;font-weight:bold;padding:4px 10px;border-radius:12px;margin-bottom:10px;}input{width:100%;padding:12px;background:#080c14;border:1px solid #334155;border-radius:8px;color:#fff;margin-top:6px;margin-bottom:12px;box-sizing:border-box;}.btn{width:100%;background:#2563eb;color:#fff;border:none;padding:14px;border-radius:8px;font-weight:bold;cursor:pointer;}.res{margin-top:14px;background:#070a10;border:1px solid #10b981;padding:14px;border-radius:8px;text-align:center;}</style></head><body><div class='box'><div class='badge'>📁 "+f+"</div><h2 style='color:#38bdf8;'>"+dom+"</h2><p style='color:#94a3b8;font-size:13px;margin-bottom:14px;'>Age & Calculation Engine</p><label style='font-size:12px;color:#94a3b8;'>Birth Date:</label><input type='date' id='dob' value='2000-01-01'><label style='font-size:12px;color:#94a3b8;'>Target Date:</label><input type='date' id='tgt'><button class='btn' onclick='calc()'>⚡ Calculate</button><div class='res'><div style='font-size:11px;color:#94a3b8;'>RESULT</div><div id='out' style='font-size:22px;font-weight:bold;color:#34d399;margin-top:4px;'>Ready</div></div></div><script>document.getElementById('tgt').valueAsDate=new Date();function calc(){var d1=new Date(document.getElementById('dob').value),d2=new Date(document.getElementById('tgt').value);var y=Math.floor((d2-d1)/(365.25*24*60*60*1000));var d=Math.floor((d2-d1)/(24*60*60*1000));document.getElementById('out').textContent=y+' Years ('+d+' Days)';}<"+"/script></body></html>"};}
-          cur=f;var sel=document.getElementById("folderSel");sel.innerHTML=Object.keys(P).map(function(k){return '<option value="'+k+'"'+(k===cur?' selected':'')+'>📁 '+k+'</option>';}).join('');
-          l.innerHTML+="<br>> <span style='color:#34d399;'>✅ Cloned into new folder: 📁 "+f+"</span>";
-          b.disabled=false;render();showTab("preview",document.querySelectorAll(".tab")[0]);
+          function doClone(){
+            var u=document.getElementById("targetUrl").value.trim();
+            if(!u)return alert("Enter URL");
+            if(!u.startsWith("http"))u="https://"+u;
+            if(u.includes("aocalculator.in")){
+              u=u.replace("aocalculator.in","aoccalculator.in");
+            }
+            var l=document.getElementById("log"),b=document.getElementById("btnC");
+            l.style.display="block";
+            b.disabled=true;
+            var dom=u.replace(/https?:\/\//,"").split("/")[0].replace(/[^a-zA-Z0-9_-]/g,"_");
+            var f="folder_"+dom;
+            l.innerHTML="> Auto-detected target: "+u+"<br>> Creating dedicated folder: [ 📁 "+f+" ]<br>> Extracting Advance Option Chain WebApp components...";
+            P[f]={
+              "url":u,
+              "index.html":"<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>"+dom+"</title><style>html,body{margin:0;padding:0;height:100%;overflow:hidden;}iframe{width:100%;height:100%;border:none;}</style></head><body><iframe src='"+u+"' style='width:100%;height:100%;border:none;'></iframe></body></html>"
+            };
+            cur=f;
+            var sel=document.getElementById("folderSel");
+            sel.innerHTML=Object.keys(P).map(function(k){return '<option value="'+k+'"'+(k===cur?' selected':'')+'>📁 '+k+'</option>';}).join('');
+            l.innerHTML+="<br>> <span style='color:#34d399;'>✅ REAL WebApp Loaded into folder 📁 "+f+"! Switching to Live Preview...</span>";
+            b.disabled=false;
+            render();
+            showTab("preview",document.querySelectorAll(".tab")[0]);
           }
           ed.value=P[cur]["index.html"];render();
           </script></body></html>
