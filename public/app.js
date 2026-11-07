@@ -216,8 +216,9 @@
 
       const build = data.build;
       $("#build-id").textContent = build.buildId;
+      const modeLabel = build.mode === "snapshot" ? "static snapshot" : build.mode;
       $("#build-meta").textContent =
-        build.filesCount + " files · provider: " + build.provider + " · mode: " + build.mode;
+        build.filesCount + " files · provider: " + build.provider + " · mode: " + modeLabel;
       $("#build-link").href = build.previewUrl;
       $("#build-frame").src = build.previewUrl;
       $("#build-result").classList.remove("hidden");

@@ -7,6 +7,7 @@ Webapp reverse engineering dashboard: kisi bhi URL ko scan karo, ZIP/APK analyze
 - **Website scan** — Puppeteer se live page render, tech stack detect, screenshot, assets aur API calls capture.
 - **ZIP analysis** — Project ka file tree, dependencies aur tech stack.
 - **APK analysis** — Manifest, permissions, framework (Flutter / React Native / Capacitor / Cordova) aur extracted web assets. WebAPK (Chrome PWA shortcut) detect hota hai aur original `startUrl` / `scope` nikalta hai.
+- **Reconstruction** — Scan ke baad **local static snapshot** banta hai: rendered DOM + CSS/JS/images download hoke self-contained build me localize hote hain (`/preview/<buildId>/`). AI key ho to AI-generated files bhi use ho sakti hain.
 - **Reconstruction** — Scan report se naya project `workspace/reconstructed/` me generate hota hai.
 - **Dashboard** — `http://localhost:4000/` par browser UI (scan, upload, preview).
 - **Android APK** — GitHub Actions workflow `.github/workflows/build-apk.yml` push par APK build karta hai.

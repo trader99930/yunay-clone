@@ -27,7 +27,9 @@ function analyzeWebStructure(scanData) {
     apiEndpoints: scanData.apiCalls,
     screenshot: scanData.screenshot,
     navigations: scanData.navigations || [],
-    htmlPreview: scanData.htmlSnippet
+    htmlPreview: scanData.htmlSnippet,
+    // Snapshot cloning ke liye poora rendered DOM chahiye
+    html: scanData.fullHtml || null
   };
 }
 
